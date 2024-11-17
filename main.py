@@ -61,29 +61,67 @@ def get_username_from_token(token):
         return None
 # Define the Home page
 def home_page():
-    st.title("Welcome to FinanceBot!")
+    st.title("Welcome to FinChat!")
     st.write("Your AI-powered financial instructor and stock market guide")
 
     st.markdown("""
-    ## Key Features:
-    - 24/7 personalized financial advice
-    - Real-time stock market insights
-    - Interactive stock analytics
-    - Educational resources on investing and finance
+    ## Our Main Features:
     """)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("1. Financial Educator Chatbot")
+        st.markdown("""
+        - 24/7 personalized financial advice
+        - Real-time stock market insights
+        - Interactive Q&A on financial topics
+        - Tailored learning experience
+        """)
+
+    with col2:
+        st.subheader("2. Stock Analytics")
+        st.markdown("""
+        - Graphical representation of any stock
+        - Compare performance of any 2 stocks
+        - Interactive charts and visualizations
+        - Historical data analysis
+        """)
+
+    st.markdown("---")
 
     st.markdown("""
-    ---
-    ### Did you know?
-    - Over 90% of data stored in most banks is considered "static data"[7]
-    - AI chatbots in fintech can help reduce spending by approximately 14%[2]
-    - By 2024, online banking users are expected to reach 2.5 billion globally[2]
-
-    Start your journey to financial literacy and informed investing today!
+    ## Additional Features:
+    - Educational resources on investing and finance
+    - Real-time market updates
+    - Personalized investment recommendations
     """)
 
+    st.markdown("---")
+
+    st.markdown("""
+    ## Based on your recent searches...
+    ### Top Financial Educational Blogs
+    """)
+
+    blogs = [
+        ("Money with Katie", "https://moneywithkatie.com/"),
+        ("The Happy Saver", "https://www.thehappysaver.com/"),
+        ("Afford Anything", "https://affordanything.com/"),
+        ("Clever Girl Finance", "https://clevergirlfinance.com/"),
+        ("Of Dollars and Data", "https://ofdollarsanddata.com/"),
+        ("The Big Picture", "https://ritholtz.com/"),
+        ("The Intellectual Investor", "https://www.theintellectualinvestor.com/"),
+        ("Crossing Wall St", "https://www.crossingwallstreet.com/"),
+    ]
+
+    for blog_name, blog_url in blogs:
+        st.markdown(f"- [{blog_name}]({blog_url})")
+
+    st.markdown("---")
+
     st.info(
-        "FinanceBot uses advanced AI to provide up-to-date financial information and personalized advice. However, always consult with a professional financial advisor for important financial decisions.")
+        "FinanceBot uses advanced AI to provide up-to-date financial information and personalized advice. However, always consult with a professional financial advisor for important financial decisions.")# Define the Chat page
 
 
 # Define the Chat page
