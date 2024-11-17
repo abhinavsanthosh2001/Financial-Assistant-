@@ -22,9 +22,17 @@ app = Flask(__name__)
 
 os.environ["TAVILY_API_KEY"] = "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"
 os.environ['OPENAI_API_KEY'] = "sk-3otWxgTJphwfDrrbidAWhynSUwDxP9FDVdJF2YhJfMT3BlbkFJex5N8igTsrm16kSGjuMUbXwxLRnf9dX9A-cjHVhzUA"
+
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
+os.environ['LANGCHAIN_API_KEY'] = "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"
+os.environ["LANGCHAIN_PROJECT"] = "finstruct"
+
 app.config['SECRET_KEY'] = "your_secret_key_here"
 app.config["MONGO_URI"] = ("mongodb+srv://finchat:mongo@cluster0.8smto.mongodb.net/data?retryWrites=true&w=majority"
                            "&appName=Cluster0majority")
+
+# langsmith_client = Client()
 
 #AUTH
 
@@ -74,9 +82,6 @@ def login():
     return jsonify({"error": "Invalid username or password"}), 401
 
 
-
-
-
 # Define state schemas
 class InputState(TypedDict):
     query: str
@@ -109,15 +114,6 @@ def query_analyzer(state: OverallState) -> dict:
     response = chat.invoke(prompt.format_messages(query=query))
     return {"query": query, "data_source": response.content}
 
-
-# Historical Stock Data Agent
-# def historical_stock_data_agent(state: OverallState) -> dict:
-#     query = state["query"]
-#     # Extract stock symbol and date range from query
-#     # For simplicity, let's assume we're getting Apple stock data for the last 5 years
-#     stock_data = yf.Ticker("AAPL").history(period="1mo")
-#     print(len(stock_data))
-#     return {"historical_data": stock_data.to_dict()}
 
 def historical_stock_data_agent(state: OverallState) -> dict:
     query = state["query"]
