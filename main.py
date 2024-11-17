@@ -8,6 +8,7 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from pymongo import MongoClient
 from bson import ObjectId
+import numpy as np
 
 from app import jwt
 
@@ -39,13 +40,7 @@ def main():
         st.sidebar.metric("S&P 500", "4,137.64", "+1.23%")
         st.sidebar.metric("NASDAQ", "12,059.61", "-0.76%")
         st.sidebar.metric("DOW", "32,977.21", "+0.80%")
-        start_date = st.date_input("Start Date", value=pd.to_datetime("2024-09-07"))
-        end_date = st.date_input("End Date", value=pd.to_datetime("2024-11-07"))
-
-        data = yf.download("NASDAQ", start=start_date, end=end_date)
-        print(data.index, data["NASDAQ"])
-        st.sidebar.markdown("---")
-
+ 
         # User Profile
         if 'user_name' not in st.session_state:
             st.session_state.user_name = ""
@@ -125,80 +120,147 @@ def chat_page():
         else:
             st.error("Error: Unable to get response from the API.")
 
-
 # Define the Analytics page
 def analytics_page():
     st.title("Stock Analytics")
 
     # List of companies
     companies = ["Apple", "Google", "Amazon", "Microsoft", "Tesla", "Facebook", "Netflix", "NVIDIA"]
-    company_to_symbol = {"Apple":"AAPL", "Microsoft": "MSFT", "Amazon": "AMZN", "Google": "GOOGL", "Facebook": "FB",
+    company_to_symbol = {"Apple":"AAPL", "Microsoft": "MSFT", "Amazon": "AMZN", "Google": "GOOGL", "Facebook": "META",
         "Tesla":"TSLA", "Netflix": "NFLX","NVIDIA": "NVDA"}
 
     stock_labels = ["Open", "High", "Low", "Close", "Volume"]
 
     # Dropdown to select a company
-    selected_company = st.selectbox("Select a company for analysis:", companies)
+    # selected_company = st.selectbox("Select a company for analysis:", companies)
 
-    st.write(f"You selected: {selected_company}")
+    selected_companies = st.multiselect("Select up to two companies for analysis:", companies, max_selections=2)
+
+    if len(selected_companies) == 1:
+        st.write(f"You selected: {selected_companies[0]}")
+    elif len(selected_companies) == 2:
+        st.write(f"You selected: {selected_companies[0]} and {selected_companies[1]}")
+    
 
     start_date = st.date_input("Start Date", value=pd.to_datetime("2024-09-07"))
     end_date = st.date_input("End Date", value=pd.to_datetime("2024-11-07"))
 
-    selected_label = st.selectbox("Select a company for analysis:", stock_labels)
-
+    selected_label = st.selectbox("Select a stock attribute:", stock_labels)
+    color1 = 'yellow'
+    color2 = 'cyan'
 
     try:
-        data = yf.download(company_to_symbol[selected_company], start=start_date, end=end_date)
-        if data.empty:
-            st.error("No data found. Please check the ticker symbol or date range.")
-        else:
-            st.success(f"Data fetched successfully for {selected_company}!")
+        plt.style.use('dark_background')
+        fig, ax = plt.subplots(figsize=(12, 6))
 
-            # Show the data table
-            # st.write("### Stock Data Preview", data.head())
+        data_dict = {}
+        for company in selected_companies:
+            data = yf.download(company_to_symbol[company], start=start_date, end=end_date)
+            if data.empty:
+                st.error(f"No data found for {company}. Please check the ticker symbol or date range.")
+            else:
+                data_dict[company] = data
 
-            # Plot the data
-            plt.style.use('dark_background')
-            fig, ax = plt.subplots(figsize=(12, 6))
-            ax.plot(data.index, data[selected_label], label=selected_label, color="blue")
-            ax.set_title(f"{selected_company} Stock Prices ({start_date} to {end_date})")
+        if len(selected_companies) == 2 and all(not data.empty for data in data_dict.values()):
+            st.success(f"Data fetched successfully for {' and '.join(selected_companies)}!")
+
+            # if comparison_method == "Dual Y-Axis" and len(selected_companies) == 2:
+            ax2 = ax.twinx()
+            
+            data1 = data_dict[selected_companies[0]][selected_label].values
+            data2 = data_dict[selected_companies[1]][selected_label].values
+            
+            line1, = ax.plot(data_dict[selected_companies[0]].index, data1, 
+                            label=f"{selected_companies[0]} - {selected_label}", color=color1)
+            line2, = ax2.plot(data_dict[selected_companies[1]].index, data2, 
+                            label=f"{selected_companies[1]} - {selected_label}", color=color2)
+            
+            # Calculate the range for each dataset
+            min1, max1 = np.min(data1), np.max(data1)
+            min2, max2 = np.min(data2), np.max(data2)
+            range1 = max1 - min1
+            range2 = max2 - min2
+            
+            # Calculate the maximum range and adjust limits
+            max_range = max(range1, range2)
+            buffer = max_range * 0.1
+            
+            ax.set_ylim(min1 - buffer, min1 + max_range + buffer)
+            ax2.set_ylim(min2 - buffer, min2 + max_range + buffer)
+            
+            ax.set_ylabel(f"{selected_companies[0]} {selected_label} Price (USD)", color=color1)
+            ax2.set_ylabel(f"{selected_companies[1]} {selected_label} Price (USD)", color=color2)
+            
+            ax.tick_params(axis='y', labelcolor=color1)
+            ax2.tick_params(axis='y', labelcolor=color2)
+            
+            # Combine legends
+            lines = [line1, line2]
+            ax.legend(lines, [l.get_label() for l in lines], loc='upper left')
+
+            ax.set_title(f"Stock {selected_label} Comparison ({start_date} to {end_date})")
             ax.set_xlabel("Date")
-            ax.set_ylabel("Close Price (USD)")
-            ax.grid()
-            ax.legend()
+            ax.grid(True, alpha=0.3)
 
-            # Display the plot in Streamlit
             st.pyplot(fig)
+
+        elif len(selected_companies) == 1:
+            company = selected_companies[0]
+
+            if data.empty:
+                st.error(f"No data found for {company}. Please check the ticker symbol or date range.")
+            else:
+                ax.plot(data.index, data[selected_label], label=f"{company} - {selected_label}", color=color1)
+
+            if all(not data.empty for data in [yf.download(company_to_symbol[company], start=start_date, end=end_date) for company in selected_companies]):
+                st.success(f"Data fetched successfully for {' and '.join(selected_companies)}!")
+
+                ax.set_title(f"Stock Prices Comparison ({start_date} to {end_date})")
+                ax.set_xlabel("Date")
+                ax.set_ylabel(f"{selected_label} Price (USD)", color=color1)
+                ax.grid()
+                ax.legend()
+
+                # Display the plot in Streamlit
+                st.pyplot(fig)
+
+
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
-    prompt = f'''Give me news articles on {selected_company} published between {start_date} and {end_date}. 
-    The articles must be relevant to someone who wishes to invest in the company. 
-    This can also include articles that explains sudden dip or rise in the stock values.
-    Also mention the publishing date for each article.
-    '''
 
-    # Call the chatbot backend API
-    headers = {"Authorization": f"Bearer {st.session_state.access_token}"}
-    response = requests.post('http://0.0.0.0:8080/api/chat', json={"query": prompt},headers=headers)
 
-    if response.ok:
-        bot_response = response.json().get('response', 'Sorry, I did not understand that.')
+    if len(selected_companies) == 2:
+        prompt = f'''Give me news articles seperataly on both {selected_companies[0]} and {selected_companies[1]} 
+        published between {start_date} and {end_date}. 
+        All the articles must be relevant to someone who wishes to invest in these companies. 
+        All the articles must also have their website link and publishing date if possible.
+        '''
+
         
-        st.write(bot_response)
+    elif len(selected_companies) == 1:
+        prompt = f'''Give me news articles on {company} published between {start_date} and {end_date}. 
+                All the articles must be relevant to someone who wishes to invest in these companies. 
+                All the articles must also have their website link and publishing date if possible.
+                ''' 
+        
     else:
-        st.write(response.text)
-        st.error("Error: Unable to get response from the API.")
+        prompt = ""
+        
 
-    # Placeholder for future analytics features
-    # st.write("Analytics features coming soon!")
+    if prompt != "":
+        # Call the chatbot backend API
+        headers = {"Authorization": f"Bearer {st.session_state.access_token}"}
+        response = requests.post('http://0.0.0.0:8080/api/chat', json={"query": prompt},headers=headers)
 
-    # You can add more analytics features here, such as:
-    # - Historical stock price charts
-    # - Financial metrics
-    # - News sentiment analysis
-    # - Predictive models
+        if response.ok:
+            bot_response = response.json().get('response', 'Sorry, I did not understand that.')
+            
+            st.write(bot_response)
+        else:
+            st.write(response.text)
+            st.error("Error: Unable to get response from the API.")
+
 
 def login_page():
     st.title("Login")
