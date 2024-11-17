@@ -141,6 +141,24 @@ def analytics_page():
     except Exception as e:
         st.error(f"An error occurred: {e}")
 
+    prompt = f'''Give me news articles on {selected_company} published between {start_date} and {end_date}. 
+    The articles must be relevant to someone who wishes to invest in the company. 
+    This can also include articles that explains sudden dip or rise in the stock values.
+    Also mention the publishing date for each article.
+    '''
+
+    # Call the chatbot backend API
+    headers = {"Authorization": f"Bearer {st.session_state.access_token}"}
+    response = requests.post('http://0.0.0.0:8080/api/chat', json={"query": prompt},headers=headers)
+
+    if response.ok:
+        bot_response = response.json().get('response', 'Sorry, I did not understand that.')
+        
+        st.write(bot_response)
+    else:
+        st.write(response.text)
+        st.error("Error: Unable to get response from the API.")
+
     # Placeholder for future analytics features
     # st.write("Analytics features coming soon!")
 
