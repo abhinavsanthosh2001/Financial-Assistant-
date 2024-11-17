@@ -37,10 +37,10 @@ def main():
         # Market Overview
         st.sidebar.subheader("Market Overview")
         # You would typically fetch this data from an API
-        st.sidebar.metric("S&P 500", "4,137.64", "+1.23%")
-        st.sidebar.metric("NASDAQ", "12,059.61", "-0.76%")
-        st.sidebar.metric("DOW", "32,977.21", "+0.80%")
- 
+        st.sidebar.metric("S&P 500", "5,870.62", "-1.32%")
+        st.sidebar.metric("NASDAQ", "78.76", "+0.70")
+        st.sidebar.metric("DOW", "43,444.99", "+0.70%")
+
         # User Profile
         if 'user_name' not in st.session_state:
             st.session_state.user_name = ""
@@ -105,10 +105,10 @@ def home_page():
     """)
 
     blogs = [
-        ("Money with Katie", "https://moneywithkatie.com/"),
+        ("Online Trading for Beginners", "https://www.google.com/aclk?sa=l&ai=DChcSEwjb1pjf6-OJAxWtLdQBHbR8GR4YABABGgJvYQ&co=1&ase=2&gclid=CjwKCAiAxea5BhBeEiwAh4t5KzWbMyfw0HZR27c7X08wS54Z8L1VDcs-4LFKRR3P5kjKgZNlWV5-LBoCUt8QAvD_BwE&sig=AOD64_1fF7PaVStHRyLWUIVxep4ckf1CKA&q&nis=4&adurl&ved=2ahUKEwjs_5Lf6-OJAxVRLdAFHUimClAQ0Qx6BAgKEAE"),
         ("The Happy Saver", "https://www.thehappysaver.com/"),
         ("Afford Anything", "https://affordanything.com/"),
-        ("Clever Girl Finance", "https://clevergirlfinance.com/"),
+        ("Schwab Starter Kit", "https://www.google.com/aclk?sa=l&ai=DChcSEwjb1pjf6-OJAxWtLdQBHbR8GR4YABADGgJvYQ&co=1&ase=2&gclid=CjwKCAiAxea5BhBeEiwAh4t5K8--4xngdwsKgFSEYypOu-g2WsZAL3yHXsk683ohUQP6B8F-I-X7_xoCBrEQAvD_BwE&sig=AOD64_37OGFg2yEoqhe5I9Tm7jLiyiP6mw&q&nis=4&adurl&ved=2ahUKEwjs_5Lf6-OJAxVRLdAFHUimClAQ0Qx6BAgLEAE"),
         ("Of Dollars and Data", "https://ofdollarsanddata.com/"),
         ("The Big Picture", "https://ritholtz.com/"),
         ("The Intellectual Investor", "https://www.theintellectualinvestor.com/"),
