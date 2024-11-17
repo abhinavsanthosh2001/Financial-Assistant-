@@ -15,24 +15,22 @@ import pandas as pd
 from flask import Flask, request, jsonify, session
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from pymongo import MongoClient
-from bson import ObjectId
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__)
 
-os.environ["TAVILY_API_KEY"] = "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"
-os.environ['OPENAI_API_KEY'] = "sk-3otWxgTJphwfDrrbidAWhynSUwDxP9FDVdJF2YhJfMT3BlbkFJex5N8igTsrm16kSGjuMUbXwxLRnf9dX9A-cjHVhzUA"
+os.environ["TAVILY_API_KEY"] = os.getenv("TAVILY_API_KEY")
+os.environ['OPENAI_API_KEY'] = os.getenv("OPENAI_API_KEY")
 
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
-os.environ['LANGCHAIN_API_KEY'] = "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"
-os.environ["LANGCHAIN_PROJECT"] = "finstruct"
+os.environ["LANGCHAIN_TRACING_V2"] = os.getenv("LANGCHAIN_TRACING_V2")
+os.environ["LANGCHAIN_ENDPOINT"] = os.getenv("LANGCHAIN_ENDPOINT")
+os.environ['LANGCHAIN_API_KEY'] = os.getenv("LANGCHAIN_API_KEY")
+os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT")
 
-app.config['SECRET_KEY'] = "your_secret_key_here"
-app.config["MONGO_URI"] = ("mongodb+srv://finchat:mongo@cluster0.8smto.mongodb.net/data?retryWrites=true&w=majority"
-                           "&appName=Cluster0majority")
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 
-# langsmith_client = Client()
 
 #AUTH
 
