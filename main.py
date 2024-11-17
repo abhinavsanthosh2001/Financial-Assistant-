@@ -25,16 +25,38 @@ def main():
         else:
             signup_page()
     else:
-        st.sidebar.title("Navigation")
+        st.sidebar.markdown("---")
+
+        # Navigation
+        st.sidebar.subheader("Navigation")
         selection = st.sidebar.radio("Go to", ["Home", "Chat", "Analytics"])
 
+        st.sidebar.markdown("---")
+
+        # Market Overview
+        st.sidebar.subheader("Market Overview")
+        # You would typically fetch this data from an API
+        st.sidebar.metric("S&P 500", "4,137.64", "+1.23%")
+        st.sidebar.metric("NASDAQ", "12,059.61", "-0.76%")
+        st.sidebar.metric("DOW", "32,977.21", "+0.80%")
+        start_date = st.date_input("Start Date", value=pd.to_datetime("2024-09-07"))
+        end_date = st.date_input("End Date", value=pd.to_datetime("2024-11-07"))
+
+        data = yf.download("NASDAQ", start=start_date, end=end_date)
+        print(data.index, data["NASDAQ"])
+        st.sidebar.markdown("---")
+
+        # User Profile
+        if 'user_name' not in st.session_state:
+            st.session_state.user_name = ""
+
+        # Main Content
         if selection == "Home":
             home_page()
         elif selection == "Chat":
             chat_page()
         elif selection == "Analytics":
             analytics_page()
-
 def get_username_from_token(token):
     try:
         decoded = jwt.decode(token, options={"verify_signature": False})
@@ -44,19 +66,29 @@ def get_username_from_token(token):
         return None
 # Define the Home page
 def home_page():
-    username = get_username_from_token(st.session_state.access_token)
-    st.title(f"Welcome!")
-    st.write("This is your Stock Chatbot and Analytics App")
+    st.title("Welcome to FinanceBot!")
+    st.write("Your AI-powered financial instructor and stock market guide")
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("Go to Chat Page"):
-            st.session_state.page = "Chat"
-            st.rerun()
-    with col2:
-        if st.button("Go to Analytics Page"):
-            st.session_state.page = "Analytics"
-            st.rerun()
+    st.markdown("""
+    ## Key Features:
+    - 24/7 personalized financial advice
+    - Real-time stock market insights
+    - Interactive stock analytics
+    - Educational resources on investing and finance
+    """)
+
+    st.markdown("""
+    ---
+    ### Did you know?
+    - Over 90% of data stored in most banks is considered "static data"[7]
+    - AI chatbots in fintech can help reduce spending by approximately 14%[2]
+    - By 2024, online banking users are expected to reach 2.5 billion globally[2]
+
+    Start your journey to financial literacy and informed investing today!
+    """)
+
+    st.info(
+        "FinanceBot uses advanced AI to provide up-to-date financial information and personalized advice. However, always consult with a professional financial advisor for important financial decisions.")
 
 
 # Define the Chat page
